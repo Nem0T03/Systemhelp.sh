@@ -58,12 +58,12 @@ Tải và Cài Đặt: Tải script từ nguồn chia sẻ, sau đó cấp quy�
 
 Sao chép mã 
 ---------------------------
-| chmod +x Systemhelp.sh  |
+ chmod +x Systemhelp.sh  
 ---------------------------
 Chạy Script: Để bắt đầu sử dụng các chức năng của script, bạn chỉ cần chạy nó với quyền sudo:
 
 ----------------------
-sudo ./Systemhelp.sh |
+sudo ./Systemhelp.sh 
 ----------------------
 
 Chọn Tác Vụ: Khi chạy script, bạn sẽ được đưa vào menu chính để chọn tác vụ mà mình muốn thực hiện, như cài đặt web server, quản lý user, hoặc kiểm tra logs.
