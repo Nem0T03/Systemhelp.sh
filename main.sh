@@ -762,7 +762,7 @@ while true; do
     read -p "Bạn có muốn tiếp tục không : y or n ? " continue_choice
     # Check the user's response
     if [[ "$continue_choice" != "y" ]]; then
-        echo "Cảm ơn bạn đã sử dụng tools của Zlipper."
+        echo "Cảm ơn bạn đã sử dụng tools của 1_L0V3_P3T."
         exit
     else 
         clear
