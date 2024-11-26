@@ -56,7 +56,6 @@ Systemhelp.sh giúp cài đặt và cấu hình MySQL, một hệ quản trị c
 Tải và Cài Đặt: Tải script từ nguồn chia sẻ, sau đó cấp quyền thực thi cho nó với lệnh:
 
 
-Sao chép mã 
 ---------------------------
  chmod +x Systemhelp.sh  
 ---------------------------
