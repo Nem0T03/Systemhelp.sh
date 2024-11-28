@@ -710,10 +710,21 @@ config_php
     done
 }
         ;;
-    4)
+   4)
+
     config_dns() {
-        echo " DNS la gi ? cach hoat dong "
-        echo " DNS (Domain Name System) là hệ thống máy chủ dịch tên miền, giúp thay thế các địa chỉ IP phức tạp bằng các tên miền dễ nhớ. Khi bạn truy cập một trang web (ví dụ: facebook.com), quy trình hoạt động của DNS sẽ như sau:
+    echo "Chọn một tùy chọn:"
+    echo "1) Hướng dẫn về DNS"
+    echo "2) Cài đặt DNS server"
+    echo "3) Thêm tên miền"
+    echo "4) Xóa tên miền"
+    echo "5) Thoát"
+    read -p "Nhập lựa chọn của bạn: " choice
+
+    case $choice in
+    1)
+        echo "DNS là gì? Cách hoạt động"
+        echo "DNS (Domain Name System) là hệ thống máy chủ dịch tên miền, giúp thay thế các địa chỉ IP phức tạp bằng các tên miền dễ nhớ. Khi bạn truy cập một trang web (ví dụ: facebook.com), quy trình hoạt động của DNS sẽ như sau:
 
 Truy vấn từ trình duyệt:
 Trình duyệt của bạn sẽ kiểm tra bộ nhớ đệm (cache) cục bộ trên máy tính để tìm địa chỉ IP của tên miền.
@@ -729,49 +740,70 @@ Sau khi xác định được miền cấp cao (ví dụ .com), truy vấn sẽ 
 
 Truy vấn tới Authoritative Name Server:
 Cuối cùng, truy vấn sẽ được gửi tới Authoritative Name Server, là nơi lưu trữ thông tin chính xác về địa chỉ IP của facebook.com. Máy chủ này trả về địa chỉ IP cho Resolver Server, và kết quả được gửi đến trình duyệt của bạn."
-        
-        echo "Cấu hình DNS Server trên Linux"
+        ;;
+    2)
+        echo "Cập nhật hệ thống và cài đặt bind9..."
         sudo apt update
-        sudo apt install -y bind9
+        if ! dpkg -l | grep -qw bind9; then
+            sudo apt install -y bind9 >> /dev/null 2>&1
+        else
+            echo "bind9 đã được cài đặt."
+        fi
+        echo "Cài đặt DNS server hoàn tất!"
+        ;;
+    3)
+        read -p "Nhập tên miền (e.g., example.com): " domain_name
+        read -p "Nhập địa chỉ IP máy chủ (e.g., 192.168.1.1): " ip
+        zone_file="/etc/bind/db.$domain_name"
+        echo "Tạo file cấu hình zone tại $zone_file..."
+        sudo bash -c "cat > $zone_file <<EOF
+\$TTL    604800
+@       IN      SOA     ns1.$domain_name. admin.$domain_name. (
+                          1         ; Serial
+                          604800    ; Refresh
+                          86400     ; Retry
+                          2419200   ; Expire
+                          604800 )  ; Negative Cache TTL
+;
+@       IN      NS      ns1.$domain_name.
+ns1     IN      A       $ip
+@       IN      A       $ip
+EOF"
+        sudo bash -c "cat >> /etc/bind/named.conf.local <<EOF
+zone \"$domain_name\" {
+    type master;
+    file \"/etc/bind/db.$domain_name\";
+};
+EOF"
+        sudo named-checkzone $domain_name $zone_file
+        sudo systemctl restart bind9
+        echo "Đã thêm cấu hình tên miền $domain_name thành công!"
+        ;;
+    4)
+        read -p "Nhập tên miền muốn xóa (e.g., example.com): " domain_name
+        zone_file="/etc/bind/db.$domain_name"
+        if [ -f "$zone_file" ]; then
+            echo "Xóa file zone $zone_file..."
+            sudo rm -f "$zone_file"
+            sudo sed -i "/zone \"$domain_name\" {/,/};/d" /etc/bind/named.conf.local
+            sudo systemctl restart bind9
+            echo "Đã xóa cấu hình tên miền $domain_name."
+        else
+            echo "Tên miền $domain_name không tồn tại!"
+        fi
+        ;;
+    5)
+        echo "Thoát chương trình."
+        exit 0
+        ;;
+    *)
+        echo "Lựa chọn không hợp lệ!"
+        ;;
+    esac
+}
+config_dns
 
-        read -p "Nhập tên miền: " domain_name
-        read -p "Nhập địa chỉ IP của máy chủ: " ip
-
-
-        sudo bash -c "cat > /etc/bind/db.$domain_name <<EOF
-        \$TTL    604800
-         @       IN      SOA     ns1.$domain_name. admin.$domain_name. (
-                            1         ; Serial
-                            604800    ; Refresh
-                            86400     ; Retry
-                            2419200   ; Expire
-                            604800 )  ; Negative Cache TTL
-        ;
-        @       IN      NS      ns1.$domain_name.
-        ns1     IN      A       $ip
-        @       IN      A       $ip
-        EOF"
-
-
-       sudo bash -c "cat >> /etc/bind/named.conf.local <<EOF
-       zone \"$domain_name\" {
-           type master;
-           file \"/etc/bind/db.$domain_name\";
-           };
-           EOF"
-
-
-         sudo named-checkconf
-         sudo named-checkzone $domain_name /etc/bind/db.$domain_name
-
-
-         sudo systemctl restart bind9
-         sudo systemctl enable bind9
-
-           echo "Cấu hình DNS Server hoàn tất!"
-
- }
-          ;;
+;;
     5)
         echo "Bạn đã chọn Cài đặt và sử dụng Mailserver."
         config_Mailserver
