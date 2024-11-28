@@ -711,9 +711,67 @@ config_php
 }
         ;;
     4)
-        echo "Bạn đã chọn Cấu hình và sử dụng DNS."
-        config_DNSServer
-        ;;
+    config_dns() {
+        echo " DNS la gi ? cach hoat dong "
+        echo " DNS (Domain Name System) là hệ thống máy chủ dịch tên miền, giúp thay thế các địa chỉ IP phức tạp bằng các tên miền dễ nhớ. Khi bạn truy cập một trang web (ví dụ: facebook.com), quy trình hoạt động của DNS sẽ như sau:
+
+Truy vấn từ trình duyệt:
+Trình duyệt của bạn sẽ kiểm tra bộ nhớ đệm (cache) cục bộ trên máy tính để tìm địa chỉ IP của tên miền.
+
+Truy vấn tới Resolver Server:
+Nếu không tìm thấy trong bộ nhớ đệm, yêu cầu sẽ được gửi đến Resolver Server, thường do nhà cung cấp dịch vụ Internet (ISP) quản lý. Máy chủ này kiểm tra bộ nhớ cache của mình và nếu không có, nó sẽ tiếp tục truy vấn các cấp cao hơn.
+
+Truy vấn tới DNS Root Server:
+Nếu Resolver Server không có thông tin, nó sẽ gửi truy vấn đến Root Server. Đây là hệ thống máy chủ tên miền gốc (13 root server trên toàn thế giới), chịu trách nhiệm xử lý các tên miền cấp cao như .com, .org, .vn,...
+
+Truy vấn tới TLD Server (Top Level Domain):
+Sau khi xác định được miền cấp cao (ví dụ .com), truy vấn sẽ được chuyển đến TLD Server tương ứng, nơi lưu thông tin về tên miền cấp hai như facebook.com.
+
+Truy vấn tới Authoritative Name Server:
+Cuối cùng, truy vấn sẽ được gửi tới Authoritative Name Server, là nơi lưu trữ thông tin chính xác về địa chỉ IP của facebook.com. Máy chủ này trả về địa chỉ IP cho Resolver Server, và kết quả được gửi đến trình duyệt của bạn."
+        
+        echo "Cấu hình DNS Server trên Linux"
+        sudo apt update
+        sudo apt install -y bind9
+
+        read -p "Nhập tên miền: " domain_name
+        read -p "Nhập địa chỉ IP của máy chủ: " ip
+
+
+        sudo bash -c "cat > /etc/bind/db.$domain_name <<EOF
+        \$TTL    604800
+         @       IN      SOA     ns1.$domain_name. admin.$domain_name. (
+                            1         ; Serial
+                            604800    ; Refresh
+                            86400     ; Retry
+                            2419200   ; Expire
+                            604800 )  ; Negative Cache TTL
+        ;
+        @       IN      NS      ns1.$domain_name.
+        ns1     IN      A       $ip
+        @       IN      A       $ip
+        EOF"
+
+
+       sudo bash -c "cat >> /etc/bind/named.conf.local <<EOF
+       zone \"$domain_name\" {
+           type master;
+           file \"/etc/bind/db.$domain_name\";
+           };
+           EOF"
+
+
+         sudo named-checkconf
+         sudo named-checkzone $domain_name /etc/bind/db.$domain_name
+
+
+         sudo systemctl restart bind9
+         sudo systemctl enable bind9
+
+           echo "Cấu hình DNS Server hoàn tất!"
+
+ }
+          ;;
     5)
         echo "Bạn đã chọn Cài đặt và sử dụng Mailserver."
         config_Mailserver
@@ -762,7 +820,7 @@ while true; do
     read -p "Bạn có muốn tiếp tục không : y or n ? " continue_choice
     # Check the user's response
     if [[ "$continue_choice" != "y" ]]; then
-        echo "Cảm ơn bạn đã sử dụng tools của 1_L0V3_P3T."
+        echo "Cảm ơn bạn đã sử dụng tools của Zlipper."
         exit
     else 
         clear
