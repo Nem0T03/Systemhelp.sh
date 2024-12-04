@@ -583,29 +583,44 @@ config_php() {
 config_php
         ;;
     3)
-        echo "Quản Lý user và Group ."
-        config_usergroup() {
-    echo "Bạn đã chọn mục quản lý user và group..."
-    echo "Vui lòng chọn User hay Group để tác động:"
-    select usergroup in "User" "Group" "Thoát"; do
-        case $usergroup in
-            "User")
-                echo "Bạn đã chọn quản lý User. Vui lòng chọn tác vụ:"
-                select action in "Tạo User" "Xóa User" "Nâng cấp User thành Super User" "Thoát"; do
-                    case $action in
-                        "Tạo User")
+#!/bin/bash
+
+echo "Quản Lý User và Group"
+
+config_usergroup() {
+    while true; do
+        echo "1. Quản lý User"
+        echo "2. Quản lý Group"
+        echo "3. Thoát"
+        read -p "Vui lòng chọn (1-3): " choice_usergroup
+
+        case $choice_usergroup in
+            1)
+                while true; do
+                    echo "1. Tạo User"
+                    echo "2. Xóa User"
+                    echo "3. Nâng cấp User thành Super User"
+                    echo "4. Quay lại"
+                    read -p "Vui lòng chọn (1-4): " choice_user
+
+                    case $choice_user in
+                        1)
                             read -p "Nhập tên user cần tạo: " username
                             read -sp "Nhập mật khẩu của user: " password
                             echo
-                            sudo useradd $username -p $(openssl passwd -crypt $password)
+                            sudo useradd $username
                             if [ $? -eq 0 ]; then
-                                echo "User đã được tạo thành công."
+                                echo "$username:$password" | sudo chpasswd
+                                if [ $? -eq 0 ]; then
+                                    echo "User đã được tạo thành công."
+                                else
+                                    echo "Có lỗi khi đặt mật khẩu cho user."
+                                fi
                             else
                                 echo "Có lỗi khi tạo user."
                             fi
-                            break
                             ;;
-                        "Xóa User")
+                        2)
                             read -p "Nhập tên user cần xóa: " username
                             sudo userdel -r $username
                             if [ $? -eq 0 ]; then
@@ -613,9 +628,8 @@ config_php
                             else
                                 echo "Có lỗi khi xóa user."
                             fi
-                            break
                             ;;
-                        "Nâng cấp User thành Super User")
+                        3)
                             read -p "Nhập tên user cần nâng cấp lên Super User: " username
                             sudo usermod -aG sudo $username
                             if [ $? -eq 0 ]; then
@@ -623,22 +637,28 @@ config_php
                             else
                                 echo "Có lỗi khi nâng cấp user."
                             fi
-                            break
                             ;;
-                        "Thoát")
+                        4)
                             break
                             ;;
                         *)
-                            echo "Chọn không hợp lệ. Vui lòng chọn lại."
+                            echo "Lựa chọn không hợp lệ. Vui lòng chọn lại."
                             ;;
                     esac
                 done
                 ;;
-            "Group")
-                echo "Bạn đã chọn quản lý Group. Vui lòng chọn tác vụ:"
-                select action in "Tạo Group" "Xóa Group" "Thêm User vào Group" "Thay đổi quyền (chmod)" "Chuyển sở hữu (chown)" "Thoát"; do
-                    case $action in
-                        "Tạo Group")
+            2)
+                while true; do
+                    echo "1. Tạo Group"
+                    echo "2. Xóa Group"
+                    echo "3. Thêm User vào Group"
+                    echo "4. Thay đổi quyền (chmod)"
+                    echo "5. Chuyển sở hữu (chown)"
+                    echo "6. Quay lại"
+                    read -p "Vui lòng chọn (1-6): " choice_group
+
+                    case $choice_group in
+                        1)
                             read -p "Nhập tên group cần tạo: " groupname
                             sudo groupadd $groupname
                             if [ $? -eq 0 ]; then
@@ -646,9 +666,8 @@ config_php
                             else
                                 echo "Có lỗi khi tạo group."
                             fi
-                            break
                             ;;
-                        "Xóa Group")
+                        2)
                             read -p "Nhập tên group cần xóa: " groupname
                             sudo groupdel $groupname
                             if [ $? -eq 0 ]; then
@@ -656,9 +675,8 @@ config_php
                             else
                                 echo "Có lỗi khi xóa group."
                             fi
-                            break
                             ;;
-                        "Thêm User vào Group")
+                        3)
                             read -p "Nhập tên user cần thêm vào group: " username
                             read -p "Nhập tên group cần thêm user vào: " groupname
                             sudo usermod -aG $groupname $username
@@ -667,9 +685,8 @@ config_php
                             else
                                 echo "Có lỗi khi thêm user vào group."
                             fi
-                            break
                             ;;
-                        "Thay đổi quyền (chmod)")
+                        4)
                             read -p "Nhập đường dẫn file cần thay đổi quyền: " filepath
                             read -p "Nhập quyền (vd: 755): " permission
                             sudo chmod $permission $filepath
@@ -678,9 +695,8 @@ config_php
                             else
                                 echo "Có lỗi khi thay đổi quyền."
                             fi
-                            break
                             ;;
-                        "Chuyển sở hữu (chown)")
+                        5)
                             read -p "Nhập đường dẫn file cần chuyển sở hữu: " filepath
                             read -p "Nhập tên user cần làm chủ sở hữu: " username
                             sudo chown $username $filepath
@@ -689,121 +705,184 @@ config_php
                             else
                                 echo "Có lỗi khi thay đổi chủ sở hữu."
                             fi
-                            break
                             ;;
-                        "Thoát")
+                        6)
                             break
                             ;;
                         *)
-                            echo "Chọn không hợp lệ. Vui lòng chọn lại."
+                            echo "Lựa chọn không hợp lệ. Vui lòng chọn lại."
                             ;;
                     esac
                 done
                 ;;
-            "Thoát")
-                return
+            3)
+                echo "Thoát chương trình."
+                exit 0
                 ;;
             *)
-                echo "Chọn không hợp lệ. Vui lòng chọn lại."
+                echo "Lựa chọn không hợp lệ. Vui lòng chọn lại."
                 ;;
         esac
     done
 }
-        ;;
-   4)
 
-    config_dns() {
+config_usergroup
+;;
+   4)
+config_dns() {
     echo "Chọn một tùy chọn:"
     echo "1) Hướng dẫn về DNS"
     echo "2) Cài đặt DNS server"
-    echo "3) Thêm tên miền"
-    echo "4) Xóa tên miền"
-    echo "5) Thoát"
+    echo "3) Các loại DNS server bạn muốn thiết lập"
+    echo "4) Thoát"
     read -p "Nhập lựa chọn của bạn: " choice
 
     case $choice in
-    1)
-        echo "DNS là gì? Cách hoạt động"
-        echo "DNS (Domain Name System) là hệ thống máy chủ dịch tên miền, giúp thay thế các địa chỉ IP phức tạp bằng các tên miền dễ nhớ. Khi bạn truy cập một trang web (ví dụ: facebook.com), quy trình hoạt động của DNS sẽ như sau:
+        1)
+            echo "DNS là gì? Cách hoạt động"
+            echo "DNS (Domain Name System) là hệ thống máy chủ dịch tên miền, giúp thay thế các địa chỉ IP phức tạp bằng các tên miền dễ nhớ. Khi bạn truy cập một trang web (ví dụ: facebook.com), quy trình hoạt động của DNS sẽ như sau:"
+            echo "1. Truy vấn từ trình duyệt."
+            echo "2. Truy vấn tới Resolver Server."
+            echo "3. Truy vấn tới DNS Root Server."
+            echo "4. Truy vấn tới TLD Server (Top Level Domain)."
+            echo "5. Truy vấn tới Authoritative Name Server."
+            echo "Cuối cùng, DNS trả về địa chỉ IP cho trình duyệt của bạn."
+            ;;
+        2)
+# Update the metadata of the apt repository.
+apt update -y >/dev/null 2>&1
 
-Truy vấn từ trình duyệt:
-Trình duyệt của bạn sẽ kiểm tra bộ nhớ đệm (cache) cục bộ trên máy tính để tìm địa chỉ IP của tên miền.
+# Configure a domain name for your system.
+host_name=$(hostname | awk -F"." '{print $1}')
+echo 'Enter a new domain name for your system: '
+read -r domain_name
+hostnamectl --static set-hostname "${host_name}.$domain_name" >/dev/null 2>&1
 
-Truy vấn tới Resolver Server:
-Nếu không tìm thấy trong bộ nhớ đệm, yêu cầu sẽ được gửi đến Resolver Server, thường do nhà cung cấp dịch vụ Internet (ISP) quản lý. Máy chủ này kiểm tra bộ nhớ cache của mình và nếu không có, nó sẽ tiếp tục truy vấn các cấp cao hơn.
+fqdomain_name=$(hostname)
 
-Truy vấn tới DNS Root Server:
-Nếu Resolver Server không có thông tin, nó sẽ gửi truy vấn đến Root Server. Đây là hệ thống máy chủ tên miền gốc (13 root server trên toàn thế giới), chịu trách nhiệm xử lý các tên miền cấp cao như .com, .org, .vn,...
+# Assign the configuration files to variables.
+named_file="/etc/bind/named.conf"
+forward_file="/var/cache/bind/forward.$domain_name"
+reverse_file="/var/cache/bind/reverse.$domain_name"
 
-Truy vấn tới TLD Server (Top Level Domain):
-Sau khi xác định được miền cấp cao (ví dụ .com), truy vấn sẽ được chuyển đến TLD Server tương ứng, nơi lưu thông tin về tên miền cấp hai như facebook.com.
+# List the available network interfaces.
+net_int=$(ip -o link show | awk -F': ' '{print $2}')
+echo $net_int
+echo 'Enter the network interface to configure the DNS server with: '
+read -r net_int_name
 
-Truy vấn tới Authoritative Name Server:
-Cuối cùng, truy vấn sẽ được gửi tới Authoritative Name Server, là nơi lưu trữ thông tin chính xác về địa chỉ IP của facebook.com. Máy chủ này trả về địa chỉ IP cho Resolver Server, và kết quả được gửi đến trình duyệt của bạn."
-        ;;
-    2)
-        echo "Cập nhật hệ thống và cài đặt bind9..."
-        sudo apt update
-        if ! dpkg -l | grep -qw bind9; then
-            sudo apt install -y bind9 >> /dev/null 2>&1
-        else
-            echo "bind9 đã được cài đặt."
-        fi
-        echo "Cài đặt DNS server hoàn tất!"
-        ;;
-    3)
-        read -p "Nhập tên miền (e.g., example.com): " domain_name
-        read -p "Nhập địa chỉ IP máy chủ (e.g., 192.168.1.1): " ip
-        zone_file="/etc/bind/db.$domain_name"
-        echo "Tạo file cấu hình zone tại $zone_file..."
-        sudo bash -c "cat > $zone_file <<EOF
-\$TTL    604800
-@       IN      SOA     ns1.$domain_name. admin.$domain_name. (
-                          1         ; Serial
-                          604800    ; Refresh
-                          86400     ; Retry
-                          2419200   ; Expire
-                          604800 )  ; Negative Cache TTL
-;
-@       IN      NS      ns1.$domain_name.
-ns1     IN      A       $ip
-@       IN      A       $ip
-EOF"
-        sudo bash -c "cat >> /etc/bind/named.conf.local <<EOF
-zone \"$domain_name\" {
-    type master;
-    file \"/etc/bind/db.$domain_name\";
-};
-EOF"
-        sudo named-checkzone $domain_name $zone_file
-        sudo systemctl restart bind9
-        echo "Đã thêm cấu hình tên miền $domain_name thành công!"
-        ;;
-    4)
-        read -p "Nhập tên miền muốn xóa (e.g., example.com): " domain_name
-        zone_file="/etc/bind/db.$domain_name"
-        if [ -f "$zone_file" ]; then
-            echo "Xóa file zone $zone_file..."
-            sudo rm -f "$zone_file"
-            sudo sed -i "/zone \"$domain_name\" {/,/};/d" /etc/bind/named.conf.local
-            sudo systemctl restart bind9
-            echo "Đã xóa cấu hình tên miền $domain_name."
-        else
-            echo "Tên miền $domain_name không tồn tại!"
-        fi
-        ;;
-    5)
-        echo "Thoát chương trình."
-        exit 0
-        ;;
-    *)
-        echo "Lựa chọn không hợp lệ!"
-        ;;
+# Assign IP addresses to variables.
+net_int_ip=$(ifconfig $net_int_name | awk -F' ' 'FNR == 2 {print $2}')
+echo "${net_int_ip} ${fqdomain_name}" >> /etc/hosts
+
+oct_1=$(echo $net_int_ip | cut -d"." -f1)
+oct_2=$(echo $net_int_ip | cut -d"." -f2)
+oct_3=$(echo $net_int_ip | cut -d"." -f3)
+oct_4=$(echo $net_int_ip | cut -d"." -f4)
+first_3_oct_reverse="${oct_3}.${oct_2}.${oct_1}"
+desktop_ip="${oct_1}.${oct_2}.${oct_3}.$(expr $oct_4 - 1)"
+
+# Install the packages for the DNS server.
+apt install -y bind9 bind9utils bind9-doc >/dev/null 2>&1
+
+# Configure the “named” server configuration file with the IP address at line 13.
+sed -i "13s/^\(.\{32\}\)/\1$net_int_ip; /" $named_file
+
+# Enable a firewall rule that permits DNS traffic.
+ufw allow 53/tcp
+ufw allow 53/udp
+
+# Enable, start and verify the status of the “named” server.
+systemctl enable bind9 >/dev/null 2>&1
+systemctl start bind9 >/dev/null 2>&1
+systemctl status bind9 --no-pager >/dev/null 2>&1
+
+# Configure a primary zone for the DNS server.
+# Insert 12 blank lines at line 59.
+sed -i '59s/^/\n\n\n\n\n\n\n\n\n\n\n\n/' $named_file
+
+# Insert 'zone "[domain name]" IN {' at line 59
+sed -i '59s/^/zone "/' $named_file
+sed -i "59s/^/$domain_name/ $named_file"
+sed -i '59s/^/ IN {/' $named_file
+# Insert ' type master;' at line 60
+sed -i '60s/^/\t type master;/' $named_file
+# Insert ' file "forward.[domain name]";' at line 61
+sed -i '61s/^/ \t file "forward./' $named_file
+sed -i "61s/^/$domain_name/ $named_file"
+sed -i '61s/^/ \t file "forward./' $named_file
+# Insert ' allow-update { none; };' at line 62
+sed -i '62s/^/ \t allow-update { none; };/ $named_file'
+# Insert '};' at line 63
+sed -i '63s/^/};/' $named_file
+
+# Configure a reverse lookup zone for the DNS server.
+# Insert 'zone "[first 3 octets of IP address in reverse].in-addr.arpa" IN {' at line 65
+sed -i '65s/^/.in-addr.arpa" IN {/' $named_file
+sed -i "65s/^/$first_3_oct_reverse/ $named_file"
+sed -i '65s/^/zone "/' $named_file
+# Insert ' type master;' at line 66.
+sed -i '66s/^/\t type master;/' $named_file
+# Insert ' file "reverse.[domain name]";' at line 67.
+sed -i '67s/^/ \t file "reverse./' $named_file
+sed -i "67s/^/$domain_name/ $named_file"
+sed -i '67s/^/ \t file "reverse./' $named_file
+# Insert ' allow-update { none; };' at line 68.
+sed -i '68s/^/ \t allow-update { none; };/ $named_file'
+# Insert '};' at line 69.
+sed -i '69s/^/};/' $named_file
+
+# Configure the DNS server’s forward zone file.
+cp /etc/bind/db.local $forward_file
+# Edit line 2 as “@ IN SOA [domain name]. root.[domain name]. (”
+sed -i -e "2s/@ rname.invalid/${domain_name}. root.$domain_name/" $forward_file
+# Remove the last 3 lines of the forward zone file.
+for i in $(seq 1 3)
+do
+    sed -i '$d' $forward_file
+done
+
+# Add DNS records to the end of the forward zone line.
+echo "
+@ IN NS $domain_name.
+@ IN A $net_int_ip
+server IN A $net_int_ip
+host IN A $net_int_ip
+desktop IN A $desktop_ip
+client IN A $desktop_ip" >> $forward_file
+
+# Configure the reverse zone file.
+cp $forward_file $reverse_file
+# Edit line 10 as “@ IN PTR [domain name].”
+sed -i -e "10s/A/PTR/;10s/${net_int_ip}/${domain_name}./" $reverse_file
+# Add PTR records to the end of the reverse zone file.
+echo "11 IN PTR server.$domain_name.
+10 IN PTR desktop.$domain_name." >> $reverse_file
+
+# Configure the ownership of the forward and reverse zone files.
+chown root:bind $forward_file
+chown root:bind $reverse_file
+
+# Verify the validity of the DNS server’s configuration files.
+named-checkconf -z $named_file
+named-checkzone forward $forward_file
+named-checkzone reverse $reverse_file 
+# Restart the DNS server.
+systemctl restart bind9 >/dev/null 2>&1
+     ;;
+        4)
+            echo "Thoát khỏi chương trình."
+            exit 0
+            ;;
+        *)
+            echo "Lựa chọn không hợp lệ. Vui lòng chọn lại."
+            ;;
     esac
 }
-config_dns
 
-;;
+# Chạy hàm config_dns()
+config_dns
+   ;;
     5)
         echo "Bạn đã chọn Cài đặt và sử dụng Mailserver."
         config_Mailserver
