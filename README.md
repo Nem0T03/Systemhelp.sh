@@ -55,9 +55,12 @@
 ## **Hướng Dẫn Sử Dụng Systemhelp.sh**
 
 ### **1. Tải và Cài Đặt**
+
 Tải script từ GitHub và cấp quyền thực thi:
 ```bash
 chmod +x Systemhelp.sh
+
+-------------------------------------
 
 ### **2. Chạy chương trình **
  Sau khi Tải script từ GitHub và cấp quyền thực thi ta chạy với quyền sudo:
