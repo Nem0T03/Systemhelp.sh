@@ -8,7 +8,7 @@
 - Dễ dàng cài đặt và cấu hình máy chủ web như **Apache** hoặc **Nginx**.
 - Hỗ trợ kiểm tra và khởi động dịch vụ web để phục vụ trang web.
 
-### **2. Cài Đặt và Sử Dụng PHP 🔧**
+### **2. Cài đặt và sử dụng PHP + XAMPP 🔧**
 - Cài đặt PHP và cấu hình các module cần thiết.
 - Tích hợp PHP với web server (Apache/Nginx) một cách dễ dàng.
 
@@ -21,12 +21,10 @@
 - Hỗ trợ thiết lập dịch vụ mạng như hosting web hoặc email.
 
 ### **5. Cài Đặt và Sử Dụng Mailserver 📧**
-- Hỗ trợ cài đặt máy chủ email (ví dụ: **Postfix**, **Exim**).
+- Hỗ trợ cài đặt máy chủ email (ví dụ: **Postfix**).
 - Gửi và nhận email từ môi trường nội bộ hoặc các máy chủ bên ngoài.
 
-### **6. Giám Sát Hệ Thống 📊**
-- Kiểm tra CPU, RAM, và dung lượng ổ đĩa.
-- Phát hiện và xử lý vấn đề trước khi gây sự cố lớn.
+### **6. Kiến Thức SystemAdmin Linux  📊**
 
 ### **7. Quản Lý Máy In 🖨️**
 - Thêm, xóa máy in và quản lý tác vụ in ấn.
@@ -46,8 +44,8 @@
 ### **11. Lập Lịch Tác Vụ 🕒**
 - Cấu hình **cron jobs** để tự động hóa tác vụ định kỳ.
 
-### **12. Cài Đặt và Sử Dụng MySQL 🗄️**
-- Cài đặt và cấu hình MySQL.
+### **12. Cài Đặt và Sử Dụng SQL SERVER 🗄️**
+- Cài đặt và cấu hình SQL SERVER . 
 - Quản lý cơ sở dữ liệu và người dùng đơn giản, nhanh chóng.
 
 ---
